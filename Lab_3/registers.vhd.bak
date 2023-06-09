@@ -144,7 +144,6 @@ architecture calc of adder_subtracter is
 	signal carries: std_logic_vector(31 downto 0);
 	signal b_not_b: std_logic_vector(31 downto 0);
 
-	-- place fulladder here so I can use it
 	component fulladder
 		port(	a: in std_logic;
 			b: in std_logic;
