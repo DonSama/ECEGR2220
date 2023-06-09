@@ -38,7 +38,7 @@ main:
 	
 
 swap:	
-	slli	t1, a1, 2	#reg t1=k*4
+	slli		t1, a1, 2	#reg t1=k*4
 	add		t1, a0, t1	#reg t1=address of zing[k]
 				
 	lw		t0, 0(t1)	#reg t0=zing[k]
@@ -46,6 +46,9 @@ swap:
 				
 	sw		t2, 0(t1)	
 	sw		t0, 4(t1)	
+	addi		t4, zero, 5	#RARS step 14, add constant 5 to register 0, place result in t4
+	addi		t5, t4, 2	#RARS step 15, add constant 2 to contents of register t4, place result in t5
+	add		t6, t4, t5	#RARS step 15, add content of t5 to t4 and place result in t6
 	ret		
 
 # END OF PROGRAM
