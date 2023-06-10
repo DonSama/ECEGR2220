@@ -1,0 +1,220 @@
+--------------------------------------------------------------------------------
+--
+-- Test Bench for LAB #4
+--
+--------------------------------------------------------------------------------
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.std_logic_unsigned.all;
+USE ieee.numeric_std.ALL;
+
+ENTITY testALU_vhd IS
+END testALU_vhd;
+
+ARCHITECTURE behavior OF testALU_vhd IS 
+
+	-- Component Declaration for the Unit Under Test (UUT)
+	COMPONENT ALU
+		Port(	DataIn1: in std_logic_vector(31 downto 0);
+			DataIn2: in std_logic_vector(31 downto 0);
+			ALUCtrl: in std_logic_vector(4 downto 0);
+			Zero: out std_logic;
+			ALUResult: out std_logic_vector(31 downto 0) );
+	end COMPONENT ALU;
+
+	--Inputs
+	SIGNAL datain_a : std_logic_vector(31 downto 0) := (others=>'0');
+	SIGNAL datain_b : std_logic_vector(31 downto 0) := (others=>'0');
+	SIGNAL control	: std_logic_vector(4 downto 0)	:= (others=>'0');
+
+	--Outputs
+	SIGNAL result   :  std_logic_vector(31 downto 0);
+	SIGNAL zeroOut  :  std_logic;
+
+BEGIN
+
+	-- Instantiate the Unit Under Test (UUT)
+	uut: ALU PORT MAP(
+		DataIn1 => datain_a,
+		DataIn2 => datain_b,
+		ALUCtrl => control,
+		Zero => zeroOut,
+		ALUResult => result
+	);
+	
+
+	tb : PROCESS
+	BEGIN
+
+		-- Wait 100 ns for global reset to finish
+		wait for 100 ns;
+
+		-- Start testing the ALU
+		datain_a <= X"01234567";	-- DataIn in hex
+		datain_b <= X"11223344";
+		control  <= "00000";		-- Control in binary (ADD and ADDI test)
+		wait for 20 ns; 			-- result = 0x124578AB  and zeroOut = 0
+
+		-- Add test cases here to drive the ALU implementation
+		-- Test case 1: Immediate pass through
+		datain_a <= "10101010101010101010101010101010";
+    		datain_b <= "00000000000000000000000000001111";
+   		control <= "00000"; -- Immediate pass through
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "00000000000000000000000000001111"
+
+    		-- Test case 2: Addition
+    		datain_a <= "00000000000000000000000000000100";
+    		datain_b <= "00000000000000000000000000000011";
+    		control <= "00001"; -- Addition
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "00000000000000000000000000000111" 
+	
+		-- Test case 3: Subtraction
+    		datain_a <= "00000000000000000000000000000100";
+    		datain_b <= "00000000000000000000000000000011";
+    		control <= "10010"; -- Addition
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "00000000000000000000000000000001" 
+	
+		-- Test case 4: Addi - datain_b will be converted to a signed value outside the ALU
+    		datain_a <= "00000000000000000000000000000100";
+    		--datain_b <= "11111111111111111111111111111101";
+		datain_b <= "11111101100110101000101111000111";
+    		control <= "00011"; -- Addi
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "11111101100110101000101111001011"
+	
+		-- Test case 5: Addi
+    		datain_a <= "00000000000000000000000000000100";
+    		datain_b <= "00000000000000000000000000000011";
+    		control <= "00011"; -- Addi
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "00000000000000000000000000000111" 
+	
+		-- Test case 6: Bitwise AND
+    		datain_a <= "00000000000000000000000000001111";
+    		datain_b <= "00000000000000000000000000000000";
+    		control <= "00100"; -- Bitwise AND
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "00000000000000000000000000000000"		 
+	
+		-- Test case 6.1: Bitwise AND
+    		datain_a <= "00000000000000000000000000001111";
+    		datain_b <= "00000000000000000000000000001111";
+    		control <= "00100"; -- Bitwise AND
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = ""
+	
+		-- Test case 7: Bitwise ANDi
+    		datain_a <= "11110000111100001111000011110000";
+    		datain_b <= "11110000111100001111000011110000";
+    		control <= "00101"; -- Bitwise ANDi
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "11110000111100001111000011110000"  
+	
+    		-- Test case 8: Bitwise OR
+		datain_a <= "11001100110011001100110011001100";
+		datain_b <= "11001010110011001100110011001100";
+		--11001110110011001100110011001100
+		control <= "00110"; -- OR 
+		wait for 20 ns;
+		-- Expected output: ALUResult = "11001110110011001100110011001100"
+	
+		-- Test case 8.1: Bitwise OR
+		datain_a <= "00000000000000000000000000001111";
+		datain_b <= "00000000000000000000000011110000";
+		--11001110110011001100110011001100
+		control <= "00110"; -- OR 
+		wait for 20 ns;
+		-- Expected output: ALUResult = ""
+	
+		-- Test case 8.2: Bitwise OR
+		datain_a <= "00000000000000000000000000001111";
+		datain_b <= "00000000000000000000000000000000";
+		--11001110110011001100110011001100
+		control <= "00110"; -- OR 
+		wait for 20 ns;
+		-- Expected output: ALUResult = ""
+	
+		-- Test case 9: Bitwise ORi
+		datain_a <= "11001100110011001100110011001100";
+		datain_b <= "11001010110011001100110011001100";
+		control <= "00111"; 
+		wait for 20 ns;
+		-- Expected output: ALUResult = "11001110110011001100110011001100" 
+    
+		-- Test case 10: Shift left logical by 1
+		datain_a <= "11001100110011001100110011001100";
+		datain_b <= "00000000000000000000000000000001";
+		control <= "01000"; -- Shift left logical
+		wait for 20 ns;
+		-- Expected output: ALUResult = "10011001100110011001100110011000"
+	
+		-- Test case 11: Shift left logical by 2
+    		datain_a <= "11001100110011001100110011001100";
+    		datain_b <= "00000000000000000000000000000010";
+    		control <= "01000"; 
+    		wait for 20 ns;
+		-- Expected output: ALUResult = "00110011001100110011001100110000"
+	
+		-- Test case 11.1: Shift left logical by 2
+    		datain_a <= "00000000000000000000000000000110";
+    		datain_b <= "00000000000000000000000000000010";
+    		control <= "01000"; 
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = ""
+	
+		-- Test case 12: Shift left logical by 3
+    		datain_a <= "11001100110011001100110011001100";
+    		datain_b <= "00000000000000000000000000000011";
+    		control <= "01000"; 
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "01100110011001100110011001100000"
+	
+		-- Test case 13: Shift right logical by 1
+    		datain_a <= "11001100110011001100110011001100";
+    		datain_b <= "00000000000000000000000000000001";
+    		control <= "11000"; -- Shift right logical
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "01100110011001100110011001100110"
+	
+		-- Test case 14: Shift right logical by 2
+    		datain_a <= "00000000000000000000000000000110";
+    		datain_b <= "00000000000000000000000000000010";
+    		control <= "11000"; 
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "00110011001100110011001100110011"
+	
+		-- Test case 15: Shift right logical by 3
+    		datain_a <= "11001100110011001100110011001100";
+    		datain_b <= "00000000000000000000000000000011";
+    		control <= "11000";
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "00011001100110011001100110011001"
+	
+		-- Test case 16: Shift right logical by 4?
+    		datain_a <= "11001100110011001100110011001100";
+    		datain_b <= "00000000000000000000000000000100";
+    		control <= "11000";
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "11001100110011001100110011001100" 
+	
+		-- Test case 17: Shift left logical i by 3
+    		datain_a <= "00000000000000000000000000000110";
+    		datain_b <= "00000000000000000000000000000011";
+    		control <= "01100";
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "01100110011001100110011001100000"
+	
+		-- Test case 18: Shift right logical i by 3
+    		datain_a <= "00000000000000000000000000000110";
+    		datain_b <= "00000000000000000000000000000011";
+    		control <= "11100"; 
+    		wait for 20 ns;
+    		-- Expected output: ALUResult = "00011001100110011001100110011001"
+
+		wait; -- will wait forever
+	END PROCESS;
+
+END;
