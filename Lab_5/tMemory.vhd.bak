@@ -79,7 +79,7 @@ BEGIN
 	BEGIN
 
 		-- Wait 100 ns for global reset to finish
-		--wait for 100 ns;
+		wait for 100 ns;
 
 		-- Test RAM by filling in some values
 		reset <= '1';	-- Reset RAM module
@@ -93,61 +93,55 @@ BEGIN
 		dataIn  <= X"11111111";
 		we      <= '1';
 		clock <= '1';
-		wait for 5 ns; --115
+		wait for 5 ns;
 		clock <= '0';
-		wait for 5 ns;	--120
+		wait for 5 ns;
 		
 		address <= X"00000004";
 		dataIn  <= X"22222222";
 		we      <= '1';
 		clock <= '1';
-		wait for 5 ns;	  -- 125
+		wait for 5 ns;
 		clock <= '0';
-		wait for 5 ns;		--130
+		wait for 5 ns;
 		
 		address <= X"00000008";
 		dataIn  <= X"33333333";
 		we      <= '1';
 		clock <= '1';
-		wait for 5 ns;		  --135
+		wait for 5 ns;
 		clock <= '0';
-		wait for 5 ns;		 --140
+		wait for 5 ns;
 		
 		address <= X"0000000C";
 		dataIn  <= X"44444444";
 		we      <= '1';
 		clock <= '1';
-		wait for 5 ns;		 --145
+		wait for 5 ns;
 		clock <= '0';
-		wait for 5 ns;		  --150
+		wait for 5 ns;
 		
 		address <= X"00000010";
 		dataIn  <= X"55555555";
 		we      <= '1';
 		clock <= '1';
-		wait for 5 ns;		   --155
+		wait for 5 ns;
 		clock <= '0';
-		wait for 5 ns;		   --160
+		wait for 5 ns;
 
 		address <= X"00000200";
 		dataIn  <= X"BAADBEEF";
 		we      <= '1';
 		clock <= '1';
-		wait for 5 ns;			--165
+		wait for 5 ns;
 		clock <= '0';
-		wait for 5 ns;			  --170
+		wait for 5 ns;
 
 		-- Read back content
-		oe      <= '0';
 		we      <= '0';
+		oe	<= '1';
 
 		address <= X"00000000";
-		clock <= '1';
-		wait for 5 ns;		  --175
-		clock <= '0';
-		wait for 5 ns;		   --180
-
-		address <= X"00000001";
 		clock <= '1';
 		wait for 5 ns;
 		clock <= '0';
@@ -244,18 +238,14 @@ BEGIN
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
-		wait for 5 ns;	  
-		
-		--write to zero register
-		dataIn   <= X"88888888";
+		wait for 5 ns;	
+
+		dataIn   <= X"99999999";
 		writeReg <= "00000";
 		writeCmd <= '1';
 		wait for 5 ns;	
 		writeCmd <= '0';
 		wait for 5 ns;	
-		
-		readReg1 <= "00000";
-		wait for 10 ns;
 
 		readReg1 <= "00000";
 		readReg2 <= "01010";
@@ -275,10 +265,9 @@ BEGIN
 
 		readReg1 <= "10001";
 		readReg2 <= "00000";
-		wait for 10 ns;		
-		
+		wait for 10 ns;	
+
 		wait; -- will wait forever
 	END PROCESS;
 
 END;
-
